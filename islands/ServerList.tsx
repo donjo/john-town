@@ -51,26 +51,12 @@ export default function ServerList({ initialServers }: ServerListProps) {
   if (servers.length === 0) {
     return (
       <div class="text-center py-16 px-4">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-          <svg
-            class="w-8 h-8 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-              d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
-            />
-          </svg>
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-1">
-          No servers running
+        <div class="text-5xl mb-4">😴</div>
+        <h3 class="text-xl font-heading font-semibold text-charcoal mb-2">
+          The town is quiet...
         </h3>
-        <p class="text-gray-500 text-sm max-w-sm mx-auto">
-          Start a local development server and it will automatically appear here
+        <p class="text-bark text-sm max-w-sm mx-auto">
+          Start a local development server and a new townsperson will move in!
         </p>
       </div>
     );
@@ -79,22 +65,22 @@ export default function ServerList({ initialServers }: ServerListProps) {
   return (
     <div>
       {/* Header with count and refresh status */}
-      <div class="flex items-center justify-between mb-4">
-        <p class="text-sm text-gray-500">
-          {servers.length} server{servers.length !== 1 ? "s" : ""} running
+      <div class="flex items-center justify-between mb-5">
+        <p class="text-sm font-medium text-bark">
+          {servers.length} townsperson{servers.length !== 1 ? "s" : ""} at work
         </p>
-        <div class="flex items-center gap-2 text-xs text-gray-400">
+        <div class="flex items-center gap-2 text-xs text-driftwood">
           {isRefreshing && (
             <span class="flex items-center gap-1">
-              <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-              Updating...
+              <span class="w-1.5 h-1.5 bg-meadow rounded-full animate-pulse" />
+              Checking in...
             </span>
           )}
         </div>
       </div>
 
       {/* Grid of server cards */}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {servers.map((server) => (
           <ServerCard key={`${server.pid}-${server.port}`} server={server} />
         ))}

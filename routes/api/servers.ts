@@ -8,7 +8,7 @@
  */
 
 import { define } from "@/utils.ts";
-import { scanPorts, type DevServer } from "@/lib/port-scanner.ts";
+import { type DevServer, scanPorts } from "@/lib/port-scanner.ts";
 
 export const handler = define.handlers({
   async GET(): Promise<Response> {

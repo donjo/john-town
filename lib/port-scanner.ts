@@ -50,19 +50,6 @@ const EXCLUDED_PROCESS_NAMES = [
 ];
 
 /**
- * Converts port ranges into a flat list of individual ports to scan
- */
-function expandPortRanges(ranges: [number, number][]): number[] {
-  const ports: number[] = [];
-  for (const [start, end] of ranges) {
-    for (let port = start; port <= end; port++) {
-      ports.push(port);
-    }
-  }
-  return ports;
-}
-
-/**
  * Runs a shell command and returns the output as a string.
  * Returns empty string if the command fails.
  */
@@ -111,7 +98,13 @@ async function getProcessWorkingDir(pid: number): Promise<string> {
   }
 
   // Fallback: try using ps to get command and extract path
-  const psOutput = await runCommand(["ps", "-p", String(pid), "-o", "command="]);
+  const psOutput = await runCommand([
+    "ps",
+    "-p",
+    String(pid),
+    "-o",
+    "command=",
+  ]);
   // Look for absolute paths in the command
   const pathMatch = psOutput.match(/\/[\w/.-]+/);
   if (pathMatch) {
@@ -171,10 +164,14 @@ function detectFramework(command: string): string {
   if (cmd.includes("rails") || cmd.includes("ruby")) {
     return "Rails";
   }
-  if (cmd.includes("django") || cmd.includes("python") && cmd.includes("manage")) {
+  if (
+    cmd.includes("django") || cmd.includes("python") && cmd.includes("manage")
+  ) {
     return "Django";
   }
-  if (cmd.includes("flask") || cmd.includes("python") && cmd.includes("flask")) {
+  if (
+    cmd.includes("flask") || cmd.includes("python") && cmd.includes("flask")
+  ) {
     return "Flask";
   }
   if (cmd.includes("phoenix") || cmd.includes("elixir")) {
@@ -295,7 +292,9 @@ function parseLsofOutput(output: string): LsofEntry[] {
     if (isNaN(pid)) continue;
 
     // Extract port from the address field (usually looks like *:8000 or localhost:8000)
-    const addressField = parts.find((p) => p.includes(":") && !p.includes("0x"));
+    const addressField = parts.find((p) =>
+      p.includes(":") && !p.includes("0x")
+    );
     if (!addressField) continue;
 
     const portMatch = addressField.match(/:(\d+)$/);
@@ -353,7 +352,8 @@ export async function scanPorts(
   // Parse and filter to only include ports in our ranges, excluding system processes
   const allEntries = parseLsofOutput(output);
   const entries = allEntries.filter(
-    (e) => isPortInRanges(e.port, portRanges) && !isExcludedProcess(e.processName),
+    (e) =>
+      isPortInRanges(e.port, portRanges) && !isExcludedProcess(e.processName),
   );
 
   for (const entry of entries) {
