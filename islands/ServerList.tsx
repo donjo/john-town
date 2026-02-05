@@ -64,26 +64,26 @@ export default function ServerList({ initialServers }: ServerListProps) {
 
   return (
     <div>
-      {/* Header with count and refresh status */}
-      <div class="flex items-center justify-between mb-5">
-        <p class="text-sm font-medium text-bark">
-          {servers.length} townsperson{servers.length !== 1 ? "s" : ""} at work
-        </p>
-        <div class="flex items-center gap-2 text-xs text-driftwood">
-          {isRefreshing && (
-            <span class="flex items-center gap-1">
-              <span class="w-1.5 h-1.5 bg-meadow rounded-full animate-pulse" />
-              Checking in...
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Server cards — full width for more detail */}
+      {/* Server cards */}
       <div class="flex flex-col gap-4">
         {servers.map((server) => (
           <ServerCard key={`${server.pid}-${server.port}`} server={server} />
         ))}
+      </div>
+
+      {/* Footer: count and refresh status */}
+      <div class="flex items-center justify-between mt-6 pt-4 text-xs text-pebble">
+        <span>
+          {servers.length} townsperson{servers.length !== 1 ? "s" : ""} at work
+        </span>
+        {isRefreshing
+          ? (
+            <span class="flex items-center gap-1">
+              <span class="w-1.5 h-1.5 bg-meadow rounded-full animate-pulse" />
+              Checking in...
+            </span>
+          )
+          : <span>Auto-refreshing every 5s</span>}
       </div>
     </div>
   );

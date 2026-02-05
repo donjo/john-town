@@ -45,7 +45,7 @@ export function ServerCard({ server }: ServerCardProps) {
         </span>
 
         {/* Project name — the most important thing */}
-        <h3 class="text-xl font-heading font-bold text-charcoal truncate group-hover:text-meadow transition-colors leading-tight">
+        <h3 class="text-xl font-heading font-semibold text-charcoal truncate group-hover:text-meadow transition-colors leading-tight">
           {server.projectName}
         </h3>
 
