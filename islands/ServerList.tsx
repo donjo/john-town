@@ -79,8 +79,8 @@ export default function ServerList({ initialServers }: ServerListProps) {
         </div>
       </div>
 
-      {/* Grid of server cards */}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* Server cards — full width for more detail */}
+      <div class="flex flex-col gap-4">
         {servers.map((server) => (
           <ServerCard key={`${server.pid}-${server.port}`} server={server} />
         ))}

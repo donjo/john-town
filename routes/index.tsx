@@ -16,11 +16,13 @@ export default define.page(async function Home() {
 
   return (
     <div
-      class="min-h-screen bg-cream"
+      class="min-h-screen"
       style={{
+        backgroundColor: "#fdf5eb",
         backgroundImage:
-          "radial-gradient(var(--color-pebble) 1px, transparent 1px)",
-        backgroundSize: "24px 24px",
+          "linear-gradient(90deg, #e0c9a830 20px, transparent 20px), linear-gradient(#e0c9a830 20px, transparent 20px)",
+        backgroundPosition: "10px 10px",
+        backgroundSize: "40px 40px",
       }}
     >
       <Head>

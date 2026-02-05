@@ -21,6 +21,9 @@ export interface DevServer {
   gitBranch?: string;
   gitWorktree?: string;
   isWorktree: boolean;
+  gitDirty: boolean;
+  uptime?: string;
+  memoryMB?: number;
 }
 
 /**
@@ -194,17 +197,49 @@ function detectFramework(command: string): string {
 }
 
 /**
+ * Generic directory names that don't make good project names.
+ * If the working directory ends with one of these, we go up a level
+ * to find the actual project folder.
+ */
+const GENERIC_DIR_NAMES = new Set([
+  "src",
+  "source",
+  "app",
+  "lib",
+  "dist",
+  "build",
+  "public",
+  "server",
+  "client",
+  "web",
+  "frontend",
+  "backend",
+  "packages",
+  "cmd",
+  "bin",
+]);
+
+/**
  * Extracts the project name from a file path.
- * Returns the last directory component of the path.
+ * If the last directory component is generic (like "src"), walks up
+ * to the parent to find a more meaningful project name.
  */
 function deriveProjectName(projectPath: string): string {
   if (!projectPath) {
     return "Unknown";
   }
 
-  // Get the last component of the path
   const parts = projectPath.split("/").filter((p) => p);
-  return parts[parts.length - 1] || "Unknown";
+  const last = parts[parts.length - 1];
+
+  if (!last) return "Unknown";
+
+  // If the directory name is generic, use the parent instead
+  if (GENERIC_DIR_NAMES.has(last.toLowerCase()) && parts.length > 1) {
+    return parts[parts.length - 2];
+  }
+
+  return last;
 }
 
 /**
@@ -263,6 +298,75 @@ async function getGitInfo(
     worktree,
     isWorktree,
   };
+}
+
+/**
+ * Checks if a git repo has uncommitted changes (staged or unstaged).
+ * Returns true if there are any modifications.
+ */
+async function getGitDirty(projectPath: string): Promise<boolean> {
+  if (!projectPath) return false;
+
+  const output = await runCommand([
+    "git",
+    "-C",
+    projectPath,
+    "status",
+    "--porcelain",
+  ]);
+
+  return output.length > 0;
+}
+
+/**
+ * Gets how long a process has been running.
+ * Uses `ps` elapsed time format, then converts to a readable string.
+ * ps etime format: [[dd-]hh:]mm:ss
+ */
+async function getProcessUptime(pid: number): Promise<string | undefined> {
+  const raw = await runCommand(["ps", "-p", String(pid), "-o", "etime="]);
+  if (!raw) return undefined;
+
+  // Parse the etime format: "dd-hh:mm:ss", "hh:mm:ss", or "mm:ss"
+  const trimmed = raw.trim();
+  const dayMatch = trimmed.match(/^(\d+)-(\d+):(\d+):(\d+)$/);
+  if (dayMatch) {
+    const days = parseInt(dayMatch[1]);
+    const hours = parseInt(dayMatch[2]);
+    if (days > 0) return `${days}d ${hours}h`;
+    return `${hours}h`;
+  }
+
+  const hourMatch = trimmed.match(/^(\d+):(\d+):(\d+)$/);
+  if (hourMatch) {
+    const hours = parseInt(hourMatch[1]);
+    const mins = parseInt(hourMatch[2]);
+    if (hours > 0) return `${hours}h ${mins}m`;
+    return `${mins}m`;
+  }
+
+  const minMatch = trimmed.match(/^(\d+):(\d+)$/);
+  if (minMatch) {
+    const mins = parseInt(minMatch[1]);
+    if (mins > 0) return `${mins}m`;
+    return "<1m";
+  }
+
+  return trimmed;
+}
+
+/**
+ * Gets the memory usage of a process in megabytes.
+ * Uses `ps` RSS (resident set size) which is in kilobytes.
+ */
+async function getProcessMemory(pid: number): Promise<number | undefined> {
+  const raw = await runCommand(["ps", "-p", String(pid), "-o", "rss="]);
+  if (!raw) return undefined;
+
+  const kb = parseInt(raw.trim(), 10);
+  if (isNaN(kb)) return undefined;
+
+  return Math.round(kb / 1024);
 }
 
 /**
@@ -376,7 +480,13 @@ export async function scanPorts(
 
     const framework = detectFramework(command);
     const projectName = deriveProjectName(projectPath);
-    const gitInfo = await getGitInfo(projectPath);
+
+    const [gitInfo, gitDirty, uptime, memoryMB] = await Promise.all([
+      getGitInfo(projectPath),
+      getGitDirty(projectPath),
+      getProcessUptime(entry.pid),
+      getProcessMemory(entry.pid),
+    ]);
 
     servers.push({
       port: entry.port,
@@ -389,6 +499,9 @@ export async function scanPorts(
       gitBranch: gitInfo.branch,
       gitWorktree: gitInfo.worktree,
       isWorktree: gitInfo.isWorktree,
+      gitDirty,
+      uptime,
+      memoryMB,
     });
   }
 
