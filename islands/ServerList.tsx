@@ -23,6 +23,13 @@ export default function ServerList({ initialServers }: ServerListProps) {
   // State to track if we're currently refreshing
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Detect what hostname the user is browsing from (e.g. "localhost" vs a Tailscale hostname).
+  // Defaults to "localhost" during server-side render, then updates on the client.
+  const [hostname, setHostname] = useState("localhost");
+  useEffect(() => {
+    setHostname(globalThis.location.hostname);
+  }, []);
+
   // Auto-refresh every 5 seconds
   useEffect(() => {
     const refreshServers = async () => {
@@ -67,7 +74,11 @@ export default function ServerList({ initialServers }: ServerListProps) {
       {/* Server cards */}
       <div class="flex flex-col gap-4">
         {servers.map((server) => (
-          <ServerCard key={`${server.pid}-${server.port}`} server={server} />
+          <ServerCard
+            key={`${server.pid}-${server.port}`}
+            server={server}
+            hostname={hostname}
+          />
         ))}
       </div>
 

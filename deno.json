@@ -2,9 +2,9 @@
   "nodeModulesDir": "manual",
   "tasks": {
     "check": "deno fmt --check . && deno lint . && deno check",
-    "dev": "vite --port 3333",
+    "dev": "vite --port 3333 --host 0.0.0.0",
     "build": "vite build",
-    "start": "deno serve -A --port 3333 _fresh/server.js",
+    "start": "deno serve -A --host 0.0.0.0 --port 3333 _fresh/server.js",
     "update": "deno run -A -r jsr:@fresh/update ."
   },
   "lint": {

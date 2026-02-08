@@ -16,10 +16,13 @@ import { getCharacter } from "@/lib/characters.ts";
 
 interface ServerCardProps {
   server: DevServer;
+  hostname?: string;
 }
 
-export function ServerCard({ server }: ServerCardProps) {
-  const url = `http://${server.host}:${server.port}`;
+export function ServerCard(
+  { server, hostname = "localhost" }: ServerCardProps,
+) {
+  const url = `http://${hostname}:${server.port}`;
   const character = getCharacter(server.framework);
 
   return (
