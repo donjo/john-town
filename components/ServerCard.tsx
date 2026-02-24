@@ -4,11 +4,11 @@
  * Displays a running development server as a row in the "Town Registry" table.
  * Each server gets an animal character based on its framework.
  *
- * Desktop: 5-column CSS Grid row (Project, Process, Git, Claude, Actions)
+ * Desktop: 4-column CSS Grid row (Project, Process, Git, Claude)
  * Mobile: stacked 2-column layout with inline labels
  *
- * Click targets are separate: project name opens the server URL,
- * the Claude cell focuses the terminal, and the actions icon opens the URL.
+ * Click targets are separate: project name opens the server URL
+ * and the Claude cell focuses the terminal.
  */
 
 import type { DevServer } from "@/lib/port-scanner.ts";
@@ -17,7 +17,7 @@ import { getCharacter } from "@/lib/characters.ts";
 
 /** Shared column template used by both the header and each row */
 export const TABLE_COLUMNS =
-  "minmax(160px, 1.2fr) minmax(120px, 1fr) minmax(120px, 1.5fr) minmax(90px, auto) 48px";
+  "minmax(160px, 1.2fr) minmax(120px, 1fr) minmax(120px, 1.5fr) minmax(90px, auto)";
 
 interface ServerCardProps {
   server: DevServer;
@@ -144,7 +144,7 @@ export function ServerCard(
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              class="text-sm font-heading font-semibold text-charcoal truncate hover:text-meadow transition-colors"
+              class="text-base font-heading font-semibold text-charcoal truncate hover:text-meadow transition-colors"
             >
               {server.projectName}
             </a>
@@ -184,17 +184,6 @@ export function ServerCard(
 
         {/* Column 4: Claude */}
         <ClaudeStatus server={server} onClaudeFocus={onClaudeFocus} />
-
-        {/* Column 5: Actions */}
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="flex items-center justify-center w-8 h-8 rounded hover:bg-sand transition-colors"
-          title={`Open ${server.projectName} in browser`}
-        >
-          <ExternalLinkIcon class="text-pebble hover:text-meadow transition-colors" />
-        </a>
       </div>
 
       {/* ── Mobile Row ── */}

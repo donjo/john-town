@@ -88,7 +88,7 @@ export default function ServerList({ initialServers }: ServerListProps) {
           class="hidden md:grid items-center gap-x-4 px-4 py-2.5 bg-sand border-b-2 border-pebble"
           style={{ gridTemplateColumns: TABLE_COLUMNS }}
         >
-          {["Project", "Process", "Git", "Claude", ""].map((label) => (
+          {["Project", "Process", "Git", "Claude"].map((label) => (
             <span
               key={label}
               class="text-xs font-heading font-semibold uppercase tracking-wider text-warm-brown"

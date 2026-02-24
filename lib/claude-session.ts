@@ -158,84 +158,15 @@ export async function getSessionStatus(
   const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
   if (latestMtime < fiveMinutesAgo) return null;
 
-  // Read the tail end of the file to find the last meaningful entry
-  // JSONL files can be very large, so we only read the last chunk
-  try {
-    const file = await Deno.open(latestFile, { read: true });
-    try {
-      const fileInfo = await file.stat();
-      const fileSize = fileInfo.size;
+  // Use file modification time as the primary signal for status.
+  // When Claude is actively working (streaming text, running tools, writing
+  // progress updates), the JSONL file is constantly being written to. When
+  // Claude finishes and waits for user input, the file stops changing.
+  const fifteenSecondsAgo = Date.now() - 15 * 1000;
+  if (latestMtime > fifteenSecondsAgo) return "working";
 
-      // Read last 100KB — should contain several complete entries
-      const chunkSize = Math.min(fileSize, 100 * 1024);
-      const startPos = fileSize - chunkSize;
-
-      await file.seek(startPos, Deno.SeekMode.Start);
-      const buffer = new Uint8Array(chunkSize);
-      await file.read(buffer);
-
-      const text = new TextDecoder().decode(buffer);
-      const lines = text.split("\n").filter((l) => l.trim());
-
-      // If we didn't read from the start, the first line is probably
-      // truncated (we landed in the middle of it), so skip it
-      const startIndex = startPos > 0 ? 1 : 0;
-
-      // Walk backwards to find the last non-progress entry
-      for (let i = lines.length - 1; i >= startIndex; i--) {
-        try {
-          const entry = JSON.parse(lines[i]);
-
-          // Skip progress updates — they're not meaningful for status
-          if (entry.type === "progress") continue;
-
-          if (entry.type === "assistant") {
-            const message = entry.message;
-            if (!message?.content) return "waiting";
-
-            // content can be a string or an array of content blocks
-            const content = Array.isArray(message.content)
-              ? message.content
-              : [message.content];
-
-            // If Claude's last message includes a tool_use block,
-            // it means Claude is waiting for the tool to run
-            const hasToolUse = content.some(
-              (block: { type?: string }) => block.type === "tool_use",
-            );
-
-            return hasToolUse ? "working" : "waiting";
-          }
-
-          if (entry.type === "user") {
-            const message = entry.message;
-            if (!message?.content) return "waiting";
-
-            const content = Array.isArray(message.content)
-              ? message.content
-              : [message.content];
-
-            // If the last user message has tool_result blocks,
-            // Claude is still processing the tool output
-            const hasToolResult = content.some(
-              (block: { type?: string }) => block.type === "tool_result",
-            );
-
-            return hasToolResult ? "working" : "waiting";
-          }
-        } catch {
-          // Skip malformed or partial JSON lines
-          continue;
-        }
-      }
-    } finally {
-      file.close();
-    }
-  } catch {
-    return null;
-  }
-
-  return null;
+  // File was modified between 15 seconds and 5 minutes ago — Claude is idle
+  return "waiting";
 }
 
 /**
@@ -253,13 +184,18 @@ export async function focusTerminalSession(
 ): Promise<boolean> {
   // iTerm2 supports finding a specific tab by session ID via AppleScript
   if (session.termProgram === "iTerm.app" && session.itermSessionId) {
+    // The ITERM_SESSION_ID env var looks like "w0t1p0:C3D91F33-..."
+    // but iTerm's AppleScript "unique id" returns just the UUID after the colon
+    const sessionUUID = session.itermSessionId.split(":").pop() ??
+      session.itermSessionId;
+
     const script = `
-      tell application "iTerm2"
+      tell application "iTerm"
         activate
         repeat with w in windows
           repeat with t in tabs of w
             repeat with s in sessions of t
-              if id of s is "${session.itermSessionId}" then
+              if unique id of s is "${sessionUUID}" then
                 select t
                 return true
               end if
