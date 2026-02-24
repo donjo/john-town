@@ -1,15 +1,16 @@
 /**
- * ServerList Island
+ * ServerList Island — Town Registry Table
  *
- * An interactive island component that displays a list of running servers
- * and automatically refreshes every 5 seconds to detect new or stopped servers.
+ * An interactive island component that displays running servers in a
+ * ledger-style table and auto-refreshes every 5 seconds to detect
+ * new or stopped servers.
  *
- * Islands in Fresh are components that hydrate on the client side, enabling
- * interactivity like auto-refresh without full page reloads.
+ * Desktop: table with header row and 5-column grid rows
+ * Mobile: header hidden, rows collapse into stacked layout
  */
 
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { ServerCard } from "@/components/ServerCard.tsx";
+import { ServerCard, TABLE_COLUMNS } from "@/components/ServerCard.tsx";
 import type { DevServer } from "@/lib/port-scanner.ts";
 import type { ClaudeSession } from "@/lib/claude-session.ts";
 
@@ -18,14 +19,9 @@ interface ServerListProps {
 }
 
 export default function ServerList({ initialServers }: ServerListProps) {
-  // State to hold the current list of servers
   const [servers, setServers] = useState<DevServer[]>(initialServers);
-
-  // State to track if we're currently refreshing
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // When the Claude indicator is clicked, POST to the focus API to
-  // switch to the correct terminal tab where Claude is running
   const handleClaudeFocus = useCallback((session: ClaudeSession) => {
     fetch("/api/focus-claude", {
       method: "POST",
@@ -38,14 +34,11 @@ export default function ServerList({ initialServers }: ServerListProps) {
     }).catch((err) => console.error("Failed to focus Claude session:", err));
   }, []);
 
-  // Detect what hostname the user is browsing from (e.g. "localhost" vs a Tailscale hostname).
-  // Defaults to "localhost" during server-side render, then updates on the client.
   const [hostname, setHostname] = useState("localhost");
   useEffect(() => {
     setHostname(globalThis.location.hostname);
   }, []);
 
-  // Auto-refresh every 5 seconds
   useEffect(() => {
     const refreshServers = async () => {
       setIsRefreshing(true);
@@ -62,14 +55,10 @@ export default function ServerList({ initialServers }: ServerListProps) {
       }
     };
 
-    // Set up the interval for auto-refresh
     const intervalId = setInterval(refreshServers, 5000);
-
-    // Clean up the interval when the component unmounts
     return () => clearInterval(intervalId);
   }, []);
 
-  // Empty state - no servers running
   if (servers.length === 0) {
     return (
       <div class="text-center py-16 px-4">
@@ -86,8 +75,30 @@ export default function ServerList({ initialServers }: ServerListProps) {
 
   return (
     <div>
-      {/* Server cards */}
-      <div class="flex flex-col gap-4">
+      {/* Table container with ledger border and warm shadow */}
+      <div
+        class="bg-cream border-2 border-pebble rounded-lg overflow-hidden"
+        style={{
+          boxShadow:
+            "0 4px 12px rgba(160, 113, 79, 0.1), 0 1px 3px rgba(160, 113, 79, 0.08)",
+        }}
+      >
+        {/* Header row — desktop only */}
+        <div
+          class="hidden md:grid items-center gap-x-4 px-4 py-2.5 bg-sand border-b-2 border-pebble"
+          style={{ gridTemplateColumns: TABLE_COLUMNS }}
+        >
+          {["Project", "Process", "Git", "Claude", ""].map((label) => (
+            <span
+              key={label}
+              class="text-xs font-heading font-semibold uppercase tracking-wider text-warm-brown"
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+
+        {/* Server rows */}
         {servers.map((server) => (
           <ServerCard
             key={`${server.pid}-${server.port}`}

@@ -40,7 +40,7 @@ export default define.page(async function Home() {
       </header>
 
       {/* Server list */}
-      <main class="max-w-screen-lg mx-auto px-4 pb-10">
+      <main class="px-4 sm:px-6 lg:px-8 pb-10">
         <ServerList initialServers={servers} />
       </main>
     </div>
