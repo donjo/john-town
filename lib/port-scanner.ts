@@ -7,6 +7,11 @@
  * name, framework, and git branch.
  */
 
+import {
+  type ClaudeSession,
+  scanClaudeSessions,
+} from "@/lib/claude-session.ts";
+
 /**
  * Represents a detected local development server
  */
@@ -24,6 +29,7 @@ export interface DevServer {
   gitDirty: boolean;
   uptime?: string;
   memoryMB?: number;
+  claudeSession?: ClaudeSession;
 }
 
 /**
@@ -56,7 +62,7 @@ const EXCLUDED_PROCESS_NAMES = [
  * Runs a shell command and returns the output as a string.
  * Returns empty string if the command fails.
  */
-async function runCommand(cmd: string[]): Promise<string> {
+export async function runCommand(cmd: string[]): Promise<string> {
   try {
     const command = new Deno.Command(cmd[0], {
       args: cmd.slice(1),
@@ -503,6 +509,15 @@ export async function scanPorts(
       uptime,
       memoryMB,
     });
+  }
+
+  // Match Claude Code sessions to servers by project path
+  const claudeSessions = await scanClaudeSessions();
+  for (const session of claudeSessions) {
+    const match = servers.find((s) => s.projectPath === session.projectPath);
+    if (match) {
+      match.claudeSession = session;
+    }
   }
 
   // Sort by port number for consistent display

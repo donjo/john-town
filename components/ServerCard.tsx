@@ -12,15 +12,17 @@
  */
 
 import type { DevServer } from "@/lib/port-scanner.ts";
+import type { ClaudeSession } from "@/lib/claude-session.ts";
 import { getCharacter } from "@/lib/characters.ts";
 
 interface ServerCardProps {
   server: DevServer;
   hostname?: string;
+  onClaudeFocus?: (session: ClaudeSession) => void;
 }
 
 export function ServerCard(
-  { server, hostname = "localhost" }: ServerCardProps,
+  { server, hostname = "localhost", onClaudeFocus }: ServerCardProps,
 ) {
   const url = `http://${hostname}:${server.port}`;
   const character = getCharacter(server.framework);
@@ -70,6 +72,28 @@ export function ServerCard(
             class="w-2 h-2 rounded-full bg-sunshine border border-sunshine-dark shrink-0"
             title="Uncommitted changes"
           />
+        )}
+
+        {/* Claude session indicator — sparkle that shows if Claude Code is active */}
+        {server.claudeSession && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClaudeFocus?.(server.claudeSession!);
+            }}
+            class={`shrink-0 text-sm cursor-pointer leading-none transition-opacity hover:opacity-80 ${
+              server.claudeSession.status === "waiting"
+                ? "text-amber-500 animate-pulse"
+                : "text-pebble"
+            }`}
+            title={server.claudeSession.status === "waiting"
+              ? "Claude is waiting for input — click to focus"
+              : "Claude is working — click to focus"}
+          >
+            ✳
+          </button>
         )}
 
         {/* Spacer + external link icon pushed to the right */}

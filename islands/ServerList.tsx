@@ -8,9 +8,10 @@
  * interactivity like auto-refresh without full page reloads.
  */
 
-import { useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import { ServerCard } from "@/components/ServerCard.tsx";
 import type { DevServer } from "@/lib/port-scanner.ts";
+import type { ClaudeSession } from "@/lib/claude-session.ts";
 
 interface ServerListProps {
   initialServers: DevServer[];
@@ -22,6 +23,20 @@ export default function ServerList({ initialServers }: ServerListProps) {
 
   // State to track if we're currently refreshing
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // When the Claude indicator is clicked, POST to the focus API to
+  // switch to the correct terminal tab where Claude is running
+  const handleClaudeFocus = useCallback((session: ClaudeSession) => {
+    fetch("/api/focus-claude", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pid: session.pid,
+        termProgram: session.termProgram,
+        itermSessionId: session.itermSessionId,
+      }),
+    }).catch((err) => console.error("Failed to focus Claude session:", err));
+  }, []);
 
   // Detect what hostname the user is browsing from (e.g. "localhost" vs a Tailscale hostname).
   // Defaults to "localhost" during server-side render, then updates on the client.
@@ -78,6 +93,7 @@ export default function ServerList({ initialServers }: ServerListProps) {
             key={`${server.pid}-${server.port}`}
             server={server}
             hostname={hostname}
+            onClaudeFocus={handleClaudeFocus}
           />
         ))}
       </div>
