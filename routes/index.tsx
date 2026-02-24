@@ -29,18 +29,8 @@ export default define.page(async function Home() {
         <title>John Town</title>
       </Head>
 
-      {/* Header */}
-      <header class="px-4 pt-10 pb-6 text-center">
-        <h1 class="text-4xl font-heading font-bold text-charcoal tracking-tight">
-          Welcome to John Town
-        </h1>
-        <p class="mt-2 text-bark text-lg">
-          Your local development neighborhood
-        </p>
-      </header>
-
-      {/* Server list */}
-      <main class="px-4 sm:px-6 lg:px-8 pb-10">
+      {/* Server list (includes its own nav bar) */}
+      <main class="px-4 sm:px-6 lg:px-8 pt-6 pb-10">
         <ServerList initialServers={servers} />
       </main>
     </div>

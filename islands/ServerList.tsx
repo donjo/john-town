@@ -3,9 +3,9 @@
  *
  * An interactive island component that displays running servers in a
  * ledger-style table and auto-refreshes every 5 seconds to detect
- * new or stopped servers.
+ * new or stopped servers. Includes a nav bar with refresh status.
  *
- * Desktop: table with header row and 5-column grid rows
+ * Desktop: table with header row and 4-column grid rows
  * Mobile: header hidden, rows collapse into stacked layout
  */
 
@@ -75,6 +75,28 @@ export default function ServerList({ initialServers }: ServerListProps) {
 
   return (
     <div>
+      {/* Nav bar */}
+      <nav class="flex items-center justify-between mb-4">
+        <h1 class="text-xl font-heading font-bold text-charcoal tracking-tight">
+          John Town
+        </h1>
+        <span class="text-xs text-pebble flex items-center gap-1.5">
+          {isRefreshing
+            ? (
+              <>
+                <span class="w-1.5 h-1.5 bg-meadow rounded-full animate-pulse" />
+                Refreshing...
+              </>
+            )
+            : (
+              <>
+                <span class="w-1.5 h-1.5 bg-pebble/40 rounded-full" />
+                Auto-refresh 5s
+              </>
+            )}
+        </span>
+      </nav>
+
       {/* Table container with ledger border and warm shadow */}
       <div
         class="bg-cream border-2 border-pebble rounded-lg overflow-hidden"
@@ -107,21 +129,6 @@ export default function ServerList({ initialServers }: ServerListProps) {
             onClaudeFocus={handleClaudeFocus}
           />
         ))}
-      </div>
-
-      {/* Footer: count and refresh status */}
-      <div class="flex items-center justify-between mt-6 pt-4 text-xs text-pebble">
-        <span>
-          {servers.length} townsperson{servers.length !== 1 ? "s" : ""} at work
-        </span>
-        {isRefreshing
-          ? (
-            <span class="flex items-center gap-1">
-              <span class="w-1.5 h-1.5 bg-meadow rounded-full animate-pulse" />
-              Checking in...
-            </span>
-          )
-          : <span>Auto-refreshing every 5s</span>}
       </div>
     </div>
   );
