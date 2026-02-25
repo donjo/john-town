@@ -38,9 +38,11 @@ export interface DevServer {
  */
 export const DEFAULT_PORT_RANGES: [number, number][] = [
   [3000, 3010], // React, Remix, Rails
+  [3100, 3110], // Backend APIs
   [4000, 4010], // Phoenix, GraphQL
   [5001, 5010], // Flask (skip 5000 - used by macOS AirPlay)
   [5173, 5180], // Vite dev server
+  [5800, 5810], // Custom dev servers
   [8000, 8010], // Fresh, Django
   [8080, 8090], // General purpose
   [8888, 8895], // Jupyter
