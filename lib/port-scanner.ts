@@ -58,6 +58,8 @@ const EXCLUDED_PROCESS_NAMES = [
   "rapportd", // macOS rapport daemon
   "sharingd", // macOS sharing daemon
   "AirPlayXPCHelper", // AirPlay helper
+  "io.tailscale", // Tailscale tunnel proxy (bound by tailscale serve)
+  "tailscaled", // Tailscale daemon
 ];
 
 /**
