@@ -63,23 +63,25 @@ const EXCLUDED_PROCESS_NAMES = [
 ];
 
 /**
- * Runs a shell command and returns the output as a string.
- * Returns empty string if the command fails.
+ * Runs a shell command and returns whether it succeeded plus its output.
+ * On failure (non-zero exit or exception), returns { success: false, output: "" }.
  */
-export async function runCommand(cmd: string[]): Promise<string> {
+export async function runCommand(
+  cmd: string[],
+): Promise<{ success: boolean; output: string }> {
   try {
     const command = new Deno.Command(cmd[0], {
       args: cmd.slice(1),
       stdout: "piped",
       stderr: "piped",
     });
-    const output = await command.output();
-    if (output.success) {
-      return new TextDecoder().decode(output.stdout).trim();
-    }
-    return "";
+    const result = await command.output();
+    return {
+      success: result.success,
+      output: new TextDecoder().decode(result.stdout).trim(),
+    };
   } catch {
-    return "";
+    return { success: false, output: "" };
   }
 }
 
@@ -89,11 +91,16 @@ export async function runCommand(cmd: string[]): Promise<string> {
  */
 async function getProcessWorkingDir(pid: number): Promise<string> {
   // On macOS, we can use lsof to find the working directory
-  const output = await runCommand(["lsof", "-p", String(pid), "-Fn"]);
+  const { output: lsofOut } = await runCommand([
+    "lsof",
+    "-p",
+    String(pid),
+    "-Fn",
+  ]);
 
   // Look for the cwd entry (current working directory)
   // lsof output format: each line starts with a type character, followed by the value
-  const lines = output.split("\n");
+  const lines = lsofOut.split("\n");
   for (const line of lines) {
     // 'n' prefix indicates a filename, and 'cwd' type indicates current working directory
     if (line.startsWith("n") && !line.includes("/dev/")) {
@@ -111,7 +118,7 @@ async function getProcessWorkingDir(pid: number): Promise<string> {
   }
 
   // Fallback: try using ps to get command and extract path
-  const psOutput = await runCommand([
+  const { output: psOut } = await runCommand([
     "ps",
     "-p",
     String(pid),
@@ -119,7 +126,7 @@ async function getProcessWorkingDir(pid: number): Promise<string> {
     "command=",
   ]);
   // Look for absolute paths in the command
-  const pathMatch = psOutput.match(/\/[\w/.-]+/);
+  const pathMatch = psOut.match(/\/[\w/.-]+/);
   if (pathMatch) {
     const foundPath = pathMatch[0];
     try {
@@ -144,7 +151,13 @@ async function getProcessWorkingDir(pid: number): Promise<string> {
  * Gets the full command line of a process by its PID
  */
 async function getProcessCommand(pid: number): Promise<string> {
-  const output = await runCommand(["ps", "-p", String(pid), "-o", "command="]);
+  const { output } = await runCommand([
+    "ps",
+    "-p",
+    String(pid),
+    "-o",
+    "command=",
+  ]);
   return output;
 }
 
@@ -156,7 +169,7 @@ function detectFramework(command: string): string {
   const cmd = command.toLowerCase();
 
   // Check for specific framework patterns
-  if (cmd.includes("vite") || cmd.includes("npm") && cmd.includes("dev")) {
+  if (cmd.includes("vite") || (cmd.includes("npm") && cmd.includes("dev"))) {
     return "Vite";
   }
   if (cmd.includes("fresh") || cmd.includes("@fresh")) {
@@ -178,13 +191,11 @@ function detectFramework(command: string): string {
     return "Rails";
   }
   if (
-    cmd.includes("django") || cmd.includes("python") && cmd.includes("manage")
+    cmd.includes("django") || (cmd.includes("python") && cmd.includes("manage"))
   ) {
     return "Django";
   }
-  if (
-    cmd.includes("flask") || cmd.includes("python") && cmd.includes("flask")
-  ) {
+  if (cmd.includes("flask")) {
     return "Flask";
   }
   if (cmd.includes("phoenix") || cmd.includes("elixir")) {
@@ -264,7 +275,7 @@ async function getGitInfo(
   }
 
   // Check if this is a git repository at all
-  const gitCheck = await runCommand([
+  const { output: gitCheck } = await runCommand([
     "git",
     "-C",
     projectPath,
@@ -276,7 +287,7 @@ async function getGitInfo(
   }
 
   // Get the current branch name
-  const branch = await runCommand([
+  const { output: branch } = await runCommand([
     "git",
     "-C",
     projectPath,
@@ -317,7 +328,7 @@ async function getGitInfo(
 async function getGitDirty(projectPath: string): Promise<boolean> {
   if (!projectPath) return false;
 
-  const output = await runCommand([
+  const { output } = await runCommand([
     "git",
     "-C",
     projectPath,
@@ -334,7 +345,13 @@ async function getGitDirty(projectPath: string): Promise<boolean> {
  * ps etime format: [[dd-]hh:]mm:ss
  */
 async function getProcessUptime(pid: number): Promise<string | undefined> {
-  const raw = await runCommand(["ps", "-p", String(pid), "-o", "etime="]);
+  const { output: raw } = await runCommand([
+    "ps",
+    "-p",
+    String(pid),
+    "-o",
+    "etime=",
+  ]);
   if (!raw) return undefined;
 
   // Parse the etime format: "dd-hh:mm:ss", "hh:mm:ss", or "mm:ss"
@@ -370,7 +387,13 @@ async function getProcessUptime(pid: number): Promise<string | undefined> {
  * Uses `ps` RSS (resident set size) which is in kilobytes.
  */
 async function getProcessMemory(pid: number): Promise<number | undefined> {
-  const raw = await runCommand(["ps", "-p", String(pid), "-o", "rss="]);
+  const { output: raw } = await runCommand([
+    "ps",
+    "-p",
+    String(pid),
+    "-o",
+    "rss=",
+  ]);
   if (!raw) return undefined;
 
   const kb = parseInt(raw.trim(), 10);
@@ -449,9 +472,11 @@ export async function scanPorts(
   const servers: DevServer[] = [];
   const seenPids = new Set<number>();
 
+  // Start Claude session scanning early — it runs independently of port data
+  const claudeSessionsPromise = scanClaudeSessions();
+
   // Get all listening TCP sockets, then filter by port range
-  // This is more reliable than passing many -i:PORT arguments
-  const output = await runCommand([
+  const { output } = await runCommand([
     "lsof",
     "-n",
     "-P",
@@ -516,7 +541,7 @@ export async function scanPorts(
   }
 
   // Match Claude Code sessions to servers by project path
-  const claudeSessions = await scanClaudeSessions();
+  const claudeSessions = await claudeSessionsPromise;
   for (const session of claudeSessions) {
     const match = servers.find((s) => s.projectPath === session.projectPath);
     if (match) {

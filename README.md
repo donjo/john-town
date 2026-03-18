@@ -35,17 +35,17 @@ framework, git info, uptime, and memory usage.
 
 **Default port ranges:**
 
-| Ports       | Typical Use           |
-| ----------- | --------------------- |
-| 3000–3010   | React, Remix, Rails   |
-| 3100–3110   | Backend APIs          |
-| 4000–4010   | Phoenix, GraphQL      |
-| 5001–5010   | Flask                 |
-| 5173–5180   | Vite                  |
-| 5800–5810   | Custom dev servers    |
-| 8000–8010   | Fresh, Django         |
-| 8080–8090   | General purpose       |
-| 8888–8895   | Jupyter               |
+| Ports     | Typical Use         |
+| --------- | ------------------- |
+| 3000–3010 | React, Remix, Rails |
+| 3100–3110 | Backend APIs        |
+| 4000–4010 | Phoenix, GraphQL    |
+| 5001–5010 | Flask               |
+| 5173–5180 | Vite                |
+| 5800–5810 | Custom dev servers  |
+| 8000–8010 | Fresh, Django       |
+| 8080–8090 | General purpose     |
+| 8888–8895 | Jupyter             |
 
 Port 5000 is intentionally skipped because macOS uses it for AirPlay Receiver.
 
@@ -60,15 +60,15 @@ It works by:
 1. Finding running `claude` processes with `pgrep`
 2. Reading each process's environment variables to determine which project
    directory it's running in
-3. Checking the Claude session JSONL file's modification time to figure out
-   the current status
+3. Checking the Claude session JSONL file's modification time to figure out the
+   current status
 
 The status logic is timestamp-based:
 
 - **Modified < 15 seconds ago** → **Working** — Claude is actively streaming a
   response or running tools
-- **Modified 15 seconds – 5 minutes ago** → **Waiting** — Claude finished and
-  is waiting for your input
+- **Modified 15 seconds – 5 minutes ago** → **Waiting** — Claude finished and is
+  waiting for your input
 - **Modified > 5 minutes ago** → not shown — the session is considered stale
 
 Clicking a Claude status indicator focuses the terminal where that session is

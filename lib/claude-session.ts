@@ -50,7 +50,7 @@ export async function scanClaudeSessions(): Promise<ClaudeSession[]> {
   const sessions: ClaudeSession[] = [];
 
   // Find all processes named "claude"
-  const pgrepOutput = await runCommand(["pgrep", "-x", "claude"]);
+  const { output: pgrepOutput } = await runCommand(["pgrep", "-x", "claude"]);
   if (!pgrepOutput) return [];
 
   const pids = pgrepOutput
@@ -62,7 +62,7 @@ export async function scanClaudeSessions(): Promise<ClaudeSession[]> {
 
   // Check each process for its working directory and terminal info
   for (const pid of pids) {
-    const psOutput = await runCommand([
+    const { output: psOutput } = await runCommand([
       "ps",
       "eww",
       "-p",
@@ -118,7 +118,7 @@ function encodeProjectPath(projectPath: string): string {
  * - Assistant message with tool_use → "working" (Claude is using a tool)
  * - User message with tool_result → "working" (tool result being processed)
  */
-export async function getSessionStatus(
+async function getSessionStatus(
   projectPath: string,
 ): Promise<"waiting" | "working" | null> {
   const homeDir = Deno.env.get("HOME");
@@ -179,6 +179,26 @@ export async function getSessionStatus(
  * For other terminals: Falls back to `open -a` which just brings
  * the terminal app to the foreground.
  */
+/** Allowed terminal apps for the focus fallback (prevents arbitrary app launching) */
+const ALLOWED_TERMINALS = [
+  "iTerm.app",
+  "iTerm2",
+  "Terminal",
+  "Alacritty",
+  "WezTerm",
+  "kitty",
+  "Hyper",
+  "Warp",
+  "Rio",
+  "zed",
+  "Zed",
+];
+
+/** Validates that a string looks like a UUID (hex + dashes only) */
+function isValidUUID(value: string): boolean {
+  return /^[\da-f-]+$/i.test(value);
+}
+
 export async function focusTerminalSession(
   session: Pick<ClaudeSession, "pid" | "termProgram" | "itermSessionId">,
 ): Promise<boolean> {
@@ -188,6 +208,11 @@ export async function focusTerminalSession(
     // but iTerm's AppleScript "unique id" returns just the UUID after the colon
     const sessionUUID = session.itermSessionId.split(":").pop() ??
       session.itermSessionId;
+
+    // Validate the UUID to prevent AppleScript injection
+    if (!isValidUUID(sessionUUID)) {
+      return false;
+    }
 
     const script = `
       tell application "iTerm"
@@ -206,12 +231,15 @@ export async function focusTerminalSession(
       return false
     `;
 
-    const result = await runCommand(["osascript", "-e", script]);
-    return result === "true";
+    const { output } = await runCommand(["osascript", "-e", script]);
+    return output === "true";
   }
 
   // Fallback: just bring the terminal app to the front
   const appName = session.termProgram || "Terminal";
+  if (!ALLOWED_TERMINALS.includes(appName)) {
+    return false;
+  }
   await runCommand(["open", "-a", appName]);
   return true;
 }

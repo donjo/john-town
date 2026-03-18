@@ -6,7 +6,6 @@
  * ServerList island takes over to auto-refresh the list.
  */
 
-import { Head } from "fresh/runtime";
 import { define } from "../utils.ts";
 import { scanPorts } from "@/lib/port-scanner.ts";
 import ServerList from "../islands/ServerList.tsx";
@@ -25,11 +24,6 @@ export default define.page(async function Home() {
         backgroundSize: "40px 40px",
       }}
     >
-      <Head>
-        <title>John Town</title>
-      </Head>
-
-      {/* Server list (includes its own nav bar) */}
       <main class="px-4 sm:px-6 lg:px-8 pt-6 pb-10">
         <ServerList initialServers={servers} />
       </main>

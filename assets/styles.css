@@ -1,32 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  /* Primary colors — the "town" palette */
   --color-meadow: #7bbf6a;
   --color-meadow-dark: #5fa352;
   --color-sunshine: #ffd859;
   --color-sunshine-dark: #e5c24e;
   --color-sky: #89cff0;
-  --color-postbox: #e85d4a;
   --color-warm-brown: #a0714f;
 
-  /* Background & surface colors */
   --color-cream: #fff8ee;
   --color-sand: #f5edde;
-  --color-clover: #e8f5e2;
-  --color-blush: #ffe8e0;
-  --color-pale-sky: #e3f2fd;
 
-  /* Text colors */
   --color-charcoal: #3d3629;
   --color-bark: #6b5b4e;
   --color-driftwood: #9c8e80;
 
-  /* Border colors */
   --color-pebble: #c4b8ac;
-  --color-eggshell: #f0eae0;
 
-  /* Font families */
   --font-heading: "Fredoka", sans-serif;
   --font-body: "Nunito", sans-serif;
   --font-mono: "JetBrains Mono", monospace;

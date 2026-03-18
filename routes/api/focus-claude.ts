@@ -17,8 +17,22 @@ export const handler = define.handlers({
       const body = await ctx.req.json();
       const { pid, termProgram, itermSessionId } = body;
 
-      if (!pid || !termProgram) {
-        return Response.json({ error: "Missing pid or termProgram" }, {
+      // Validate pid is a positive integer
+      if (typeof pid !== "number" || !Number.isInteger(pid) || pid <= 0) {
+        return Response.json({ error: "Invalid pid" }, { status: 400 });
+      }
+
+      // Validate termProgram is a non-empty string
+      if (typeof termProgram !== "string" || !termProgram) {
+        return Response.json({ error: "Missing termProgram" }, { status: 400 });
+      }
+
+      // Validate itermSessionId format if provided
+      if (
+        itermSessionId !== undefined &&
+        (typeof itermSessionId !== "string" || !itermSessionId)
+      ) {
+        return Response.json({ error: "Invalid itermSessionId" }, {
           status: 400,
         });
       }

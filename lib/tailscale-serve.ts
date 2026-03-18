@@ -9,7 +9,7 @@
  * and John Town works normally on localhost.
  */
 
-import type { DevServer } from "./port-scanner.ts";
+import { type DevServer, runCommand } from "./port-scanner.ts";
 
 // Path where we save which ports we're managing, so we can clean up after crashes
 const STATE_FILE = "/tmp/john-town-serves.json";
@@ -19,29 +19,6 @@ let tailscaleAvailable = false;
 
 // The set of ports we've told Tailscale to serve
 const activePorts = new Set<number>();
-
-/**
- * Runs a shell command and returns whether it succeeded.
- * Also returns the stdout text for commands that need it.
- */
-async function runCommand(
-  cmd: string[],
-): Promise<{ success: boolean; output: string }> {
-  try {
-    const command = new Deno.Command(cmd[0], {
-      args: cmd.slice(1),
-      stdout: "piped",
-      stderr: "piped",
-    });
-    const result = await command.output();
-    return {
-      success: result.success,
-      output: new TextDecoder().decode(result.stdout).trim(),
-    };
-  } catch {
-    return { success: false, output: "" };
-  }
-}
 
 /**
  * Checks if Tailscale is installed and connected.
@@ -57,13 +34,6 @@ export async function checkTailscaleAvailable(): Promise<boolean> {
     console.log("Tailscale detected, remote proxy enabled");
   }
 
-  return tailscaleAvailable;
-}
-
-/**
- * Returns whether Tailscale is available (set by checkTailscaleAvailable).
- */
-export function isTailscaleAvailable(): boolean {
   return tailscaleAvailable;
 }
 
@@ -190,7 +160,7 @@ export async function syncTailscaleServes(
  * Removes all Tailscale serves that John Town created.
  * Called on shutdown (Ctrl+C) and on startup (to clean up from crashes).
  */
-export async function cleanupAllServes(): Promise<void> {
+async function cleanupAllServes(): Promise<void> {
   if (!tailscaleAvailable) return;
 
   for (const port of activePorts) {
