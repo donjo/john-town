@@ -13,6 +13,11 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 import { ServerCard, TABLE_COLUMNS } from "@/components/ServerCard.tsx";
 import type { DevServer } from "@/lib/port-scanner.ts";
 import type { ClaudeSession } from "@/lib/claude-session.ts";
+import {
+  type Character,
+  DEFAULT_CHARACTER,
+  type Settings,
+} from "@/lib/settings.ts";
 
 interface ServerListProps {
   initialServers: DevServer[];
@@ -39,6 +44,38 @@ export default function ServerList({ initialServers }: ServerListProps) {
     setHostname(globalThis.location.hostname);
   }, []);
 
+  const [pollInterval, setPollInterval] = useState(5000);
+  const [characters, setCharacters] = useState<Record<string, Character>>({});
+
+  const fetchSettings = useCallback(() => {
+    fetch("/api/settings")
+      .then((res) => {
+        if (!res.ok) {
+          console.error("Failed to fetch settings:", res.status);
+          return null;
+        }
+        return res.json();
+      })
+      .then((settings: Settings | null) => {
+        if (settings) {
+          setPollInterval(settings.pollInterval);
+          setCharacters(settings.characters);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch settings:", err));
+  }, []);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
+  // Re-fetch settings immediately when TownSettings saves
+  useEffect(() => {
+    const handler = () => fetchSettings();
+    globalThis.addEventListener("settings-updated", handler);
+    return () => globalThis.removeEventListener("settings-updated", handler);
+  }, [fetchSettings]);
+
   useEffect(() => {
     const refreshServers = async () => {
       setIsRefreshing(true);
@@ -55,9 +92,9 @@ export default function ServerList({ initialServers }: ServerListProps) {
       }
     };
 
-    const intervalId = setInterval(refreshServers, 5000);
+    const intervalId = setInterval(refreshServers, pollInterval);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [pollInterval]);
 
   if (servers.length === 0) {
     return (
@@ -91,7 +128,7 @@ export default function ServerList({ initialServers }: ServerListProps) {
             : (
               <>
                 <span class="w-1.5 h-1.5 bg-pebble/40 rounded-full" />
-                Auto-refresh 5s
+                Auto-refresh {pollInterval / 1000}s
               </>
             )}
         </span>
@@ -125,6 +162,7 @@ export default function ServerList({ initialServers }: ServerListProps) {
           <ServerCard
             key={`${server.pid}-${server.port}`}
             server={server}
+            character={characters[server.framework] ?? DEFAULT_CHARACTER}
             hostname={hostname}
             onClaudeFocus={handleClaudeFocus}
           />

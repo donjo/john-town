@@ -13,7 +13,7 @@
 
 import type { DevServer } from "@/lib/port-scanner.ts";
 import type { ClaudeSession } from "@/lib/claude-session.ts";
-import { getCharacter } from "@/lib/characters.ts";
+import type { Character } from "@/lib/settings.ts";
 
 /** Shared column template used by both the header and each row */
 export const TABLE_COLUMNS =
@@ -21,6 +21,7 @@ export const TABLE_COLUMNS =
 
 interface ServerCardProps {
   server: DevServer;
+  character: Character;
   hostname?: string;
   onClaudeFocus?: (session: ClaudeSession) => void;
 }
@@ -118,10 +119,9 @@ function ClaudeStatus(
 }
 
 export function ServerCard(
-  { server, hostname = "localhost", onClaudeFocus }: ServerCardProps,
+  { server, character, hostname = "localhost", onClaudeFocus }: ServerCardProps,
 ) {
   const url = `http://${hostname}:${server.port}`;
-  const character = getCharacter(server.framework);
 
   return (
     <div class="border-t border-pebble/30">
