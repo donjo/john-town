@@ -11,6 +11,7 @@ import {
   type ClaudeSession,
   scanClaudeSessions,
 } from "@/lib/claude-session.ts";
+import { getSettings, type Settings } from "@/lib/settings.ts";
 
 /**
  * Represents a detected local development server
@@ -31,36 +32,6 @@ export interface DevServer {
   memoryMB?: number;
   claudeSession?: ClaudeSession;
 }
-
-/**
- * Default port ranges to scan for development servers.
- * Each range covers the base port plus increments (for worktrees or multiple instances).
- */
-export const DEFAULT_PORT_RANGES: [number, number][] = [
-  [3000, 3010], // React, Remix, Rails
-  [3100, 3110], // Backend APIs
-  [4000, 4010], // Phoenix, GraphQL
-  [5001, 5010], // Flask (skip 5000 - used by macOS AirPlay)
-  [5173, 5180], // Vite dev server
-  [5800, 5810], // Custom dev servers
-  [8000, 8010], // Fresh, Django
-  [8080, 8090], // General purpose
-  [8888, 8895], // Jupyter
-];
-
-/**
- * System processes to exclude from results.
- * These are macOS/system processes that listen on dev ports but aren't dev servers.
- */
-const EXCLUDED_PROCESS_NAMES = [
-  "ControlCenter", // macOS AirPlay Receiver (port 5000)
-  "ControlCe", // Truncated version of ControlCenter
-  "rapportd", // macOS rapport daemon
-  "sharingd", // macOS sharing daemon
-  "AirPlayXPCHelper", // AirPlay helper
-  "io.tailscale", // Tailscale tunnel proxy (bound by tailscale serve)
-  "tailscaled", // Tailscale daemon
-];
 
 /**
  * Runs a shell command and returns whether it succeeded plus its output.
@@ -449,8 +420,11 @@ function parseLsofOutput(output: string): LsofEntry[] {
 /**
  * Checks if a process should be excluded based on its name.
  */
-function isExcludedProcess(processName: string): boolean {
-  return EXCLUDED_PROCESS_NAMES.some(
+function isExcludedProcess(
+  processName: string,
+  settings: Settings,
+): boolean {
+  return settings.excludedProcesses.some(
     (excluded) => processName.toLowerCase().startsWith(excluded.toLowerCase()),
   );
 }
@@ -466,9 +440,11 @@ function isPortInRanges(port: number, ranges: [number, number][]): boolean {
  * Main function to scan for running development servers.
  * Scans the specified port ranges (or defaults) and returns info about each server.
  */
-export async function scanPorts(
-  portRanges: [number, number][] = DEFAULT_PORT_RANGES,
-): Promise<DevServer[]> {
+export async function scanPorts(): Promise<DevServer[]> {
+  const settings = getSettings();
+  const portRanges: [number, number][] = settings.portRanges.map((
+    r,
+  ) => [r.start, r.end]);
   const servers: DevServer[] = [];
   const seenPids = new Set<number>();
 
@@ -492,7 +468,8 @@ export async function scanPorts(
   const allEntries = parseLsofOutput(output);
   const entries = allEntries.filter(
     (e) =>
-      isPortInRanges(e.port, portRanges) && !isExcludedProcess(e.processName),
+      isPortInRanges(e.port, portRanges) &&
+      !isExcludedProcess(e.processName, settings),
   );
 
   for (const entry of entries) {
