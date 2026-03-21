@@ -11,3 +11,7 @@ _fresh/
 node_modules/
 vendor/
 
+# Compiled binaries
+john-town-*
+*.tar.gz
+
