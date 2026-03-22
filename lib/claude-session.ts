@@ -106,7 +106,7 @@ export async function scanClaudeSessions(): Promise<ClaudeSession[]> {
  * Example: "/Users/john/project" becomes "-Users-john-project"
  */
 function encodeProjectPath(projectPath: string): string {
-  return projectPath.replace(/\//g, "-");
+  return projectPath.replace(/[/.]/g, "-");
 }
 
 /**
