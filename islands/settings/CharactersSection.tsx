@@ -8,9 +8,7 @@
 import { useRef } from "preact/hooks";
 import type { Character } from "@/lib/settings.ts";
 import { EmojiButton } from "./EmojiPicker.tsx";
-
-const INPUT =
-  "bg-cream border border-pebble rounded px-2 py-1.5 text-sm font-mono text-charcoal transition-colors duration-150 focus:border-meadow focus:outline-none";
+import { ADD_BTN, DELETE_BTN_HOVER, FIELD_LABEL, INPUT } from "./styles.ts";
 
 export function CharactersSection(
   { characters, onChange, onDelete }: {
@@ -22,35 +20,55 @@ export function CharactersSection(
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div class="space-y-2">
-      {Object.keys(characters).map((fw) => {
-        const ch = characters[fw];
-        return (
-          <div key={fw} class="flex items-center gap-2">
-            <span class={`${INPUT} w-28 bg-sand text-bark`}>{fw}</span>
-            <EmojiButton
-              emoji={ch.emoji}
-              onChange={(em) => onChange(fw, "emoji", em)}
-            />
-            <input
-              type="text"
-              value={ch.label}
-              class={`${INPUT} flex-1`}
-              onInput={(e) =>
-                onChange(fw, "label", (e.target as HTMLInputElement).value)}
-            />
-            <button
-              type="button"
-              class="text-pebble hover:text-charcoal cursor-pointer p-1 rounded transition-colors duration-150 hover:bg-sand"
-              onClick={() => onDelete(fw)}
-              aria-label={`Remove ${fw}`}
+    <div>
+      {/* Column labels — mirrors the dashboard table header pattern */}
+      <div class="grid grid-cols-[7rem_2.5rem_1fr_2rem] gap-2 mb-2 px-0.5">
+        <span class={FIELD_LABEL}>Framework</span>
+        <span />
+        <span class={FIELD_LABEL}>Character Name</span>
+        <span />
+      </div>
+
+      <div class="space-y-1.5">
+        {Object.keys(characters).map((fw) => {
+          const ch = characters[fw];
+          return (
+            <div
+              key={fw}
+              class="group grid grid-cols-[7rem_2.5rem_1fr_2rem] gap-2 items-center"
             >
-              {"\u2715"}
-            </button>
-          </div>
-        );
-      })}
-      <div class="flex items-center gap-2 pt-1">
+              <span
+                class={`${INPUT} bg-sand text-bark truncate`}
+                title={fw}
+              >
+                {fw}
+              </span>
+              <EmojiButton
+                emoji={ch.emoji}
+                onChange={(em) => onChange(fw, "emoji", em)}
+              />
+              <input
+                type="text"
+                value={ch.label}
+                class={INPUT}
+                onInput={(e) =>
+                  onChange(fw, "label", (e.target as HTMLInputElement).value)}
+              />
+              <button
+                type="button"
+                class={DELETE_BTN_HOVER}
+                onClick={() => onDelete(fw)}
+                aria-label={`Remove ${fw}`}
+              >
+                {"\u2715"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Add new townsperson */}
+      <div class="flex items-center gap-2 mt-4 pt-3 border-t border-pebble/20">
         <input
           ref={inputRef}
           type="text"
@@ -59,7 +77,7 @@ export function CharactersSection(
         />
         <button
           type="button"
-          class="text-sm text-meadow hover:text-meadow-dark cursor-pointer font-heading font-semibold transition-colors duration-150"
+          class={ADD_BTN}
           onClick={() => {
             const name = inputRef.current?.value.trim();
             if (name) {

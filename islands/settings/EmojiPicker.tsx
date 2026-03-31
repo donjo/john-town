@@ -3,6 +3,7 @@
  */
 
 import { useEffect, useRef, useState } from "preact/hooks";
+import { CARD_SHADOW } from "./styles.ts";
 
 const EMOJI_CATEGORIES: { label: string; icon: string; emoji: string[] }[] = [
   {
@@ -222,8 +223,7 @@ function EmojiPicker(
       style={{
         left: `${pos.left}px`,
         bottom: `${pos.bottom}px`,
-        boxShadow:
-          "0 -8px 24px rgba(61,54,41,0.12), 0 -2px 8px rgba(61,54,41,0.08)",
+        boxShadow: CARD_SHADOW,
       }}
     >
       {/* Category tabs */}
@@ -258,7 +258,7 @@ function EmojiPicker(
           <button
             key={em}
             type="button"
-            class={`w-8 h-8 flex items-center justify-center text-lg rounded cursor-pointer transition-all hover:scale-125 hover:bg-sunshine/30 ${
+            class={`w-8 h-8 flex items-center justify-center text-lg rounded-lg cursor-pointer transition-all hover:scale-125 hover:bg-sunshine/30 ${
               em === currentEmoji
                 ? "bg-sunshine/40 ring-1 ring-sunshine-dark"
                 : ""
@@ -301,7 +301,7 @@ export function EmojiButton(
       <button
         ref={btnRef}
         type="button"
-        class="w-10 h-8 flex items-center justify-center bg-cream border border-pebble rounded text-lg cursor-pointer transition-all hover:border-meadow hover:scale-110 hover:shadow-sm active:scale-95"
+        class="w-10 h-9 flex items-center justify-center bg-cream border border-pebble rounded-lg text-lg cursor-pointer transition-all hover:border-meadow hover:scale-110 hover:shadow-sm active:scale-95"
         onClick={() => setShowPicker(!showPicker)}
         title="Pick emoji"
       >

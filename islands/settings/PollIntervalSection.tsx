@@ -1,9 +1,11 @@
 /**
  * PollIntervalSection — configure server polling frequency.
+ *
+ * Compact inline control: "Poll every [N] seconds"
+ * The input is sized just wide enough for a two-digit number.
  */
 
-const INPUT =
-  "bg-cream border border-pebble rounded px-2 py-1.5 text-sm font-mono text-charcoal transition-colors duration-150 focus:border-meadow focus:outline-none";
+import { INPUT } from "./styles.ts";
 
 export function PollIntervalSection(
   { pollInterval, onChange }: {
@@ -13,13 +15,13 @@ export function PollIntervalSection(
 ) {
   return (
     <div class="flex items-center gap-2">
-      <span class="text-sm text-bark">Poll every</span>
+      <span class="text-sm font-body text-bark">Check for servers every</span>
       <input
         type="number"
         value={pollInterval / 1000}
         min="1"
         step="1"
-        class={`${INPUT} w-16`}
+        class={`${INPUT} w-14 text-center tabular-nums`}
         onInput={(e) => {
           const seconds = parseFloat(
             (e.target as HTMLInputElement).value,
@@ -27,7 +29,7 @@ export function PollIntervalSection(
           onChange(Math.max(1000, Math.round(seconds * 1000)));
         }}
       />
-      <span class="text-sm text-bark">seconds</span>
+      <span class="text-sm font-body text-bark">seconds</span>
     </div>
   );
 }

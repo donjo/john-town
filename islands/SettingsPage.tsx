@@ -12,6 +12,7 @@ import { CharactersSection } from "./settings/CharactersSection.tsx";
 import { PortRangesSection } from "./settings/PortRangesSection.tsx";
 import { ExcludedProcessesSection } from "./settings/ExcludedProcessesSection.tsx";
 import { PollIntervalSection } from "./settings/PollIntervalSection.tsx";
+import { CARD_SHADOW } from "./settings/styles.ts";
 
 type ActiveSection = "characters" | "portRanges" | "advanced";
 
@@ -217,7 +218,7 @@ export default function SettingsPage() {
         <div class="flex items-center gap-3">
           {message && (
             <span
-              class={`text-sm font-heading ${
+              class={`text-sm font-body ${
                 message.isError ? "text-red-600" : "text-meadow-dark"
               }`}
             >
@@ -226,14 +227,14 @@ export default function SettingsPage() {
           )}
           <button
             type="button"
-            class="border border-pebble text-bark rounded-lg px-4 py-1.5 text-sm font-heading transition-colors duration-150 hover:border-bark hover:text-charcoal cursor-pointer"
+            class="border border-pebble text-bark rounded-lg px-4 py-2 text-sm font-heading transition-colors duration-150 hover:border-bark hover:text-charcoal cursor-pointer"
             onClick={resetToDefaults}
           >
             Reset to Defaults
           </button>
           <button
             type="button"
-            class={`rounded-lg px-4 py-1.5 text-sm font-heading font-semibold transition-colors duration-150 ${
+            class={`rounded-lg px-4 py-2 text-sm font-heading font-semibold transition-colors duration-150 ${
               isDirty
                 ? "bg-meadow text-cream hover:bg-meadow-dark cursor-pointer"
                 : "bg-pebble/60 text-cream/80 cursor-default"
@@ -253,10 +254,7 @@ export default function SettingsPage() {
             <nav class="md:w-56 flex-none">
               <div
                 class="bg-cream border-2 border-pebble rounded-lg overflow-hidden"
-                style={{
-                  boxShadow:
-                    "0 4px 12px rgba(160,113,79,0.1), 0 1px 3px rgba(160,113,79,0.08)",
-                }}
+                style={{ boxShadow: CARD_SHADOW }}
               >
                 {SECTIONS.map(({ key, label }) => (
                   <button
@@ -264,7 +262,7 @@ export default function SettingsPage() {
                     type="button"
                     class={`w-full text-left px-4 py-3 text-sm font-heading font-semibold cursor-pointer transition-colors duration-150 border-b border-pebble/30 last:border-b-0 ${
                       activeSection === key
-                        ? "bg-sand text-charcoal border-l-3 border-l-meadow"
+                        ? "bg-sand text-charcoal border-l-[3px] border-l-meadow"
                         : "text-bark hover:bg-sand/50 hover:text-charcoal"
                     }`}
                     onClick={() => setActiveSection(key)}
@@ -289,16 +287,16 @@ export default function SettingsPage() {
             <div class="flex-1 min-w-0">
               <div
                 class="bg-cream border-2 border-pebble rounded-lg p-6"
-                style={{
-                  boxShadow:
-                    "0 4px 12px rgba(160,113,79,0.1), 0 1px 3px rgba(160,113,79,0.08)",
-                }}
+                style={{ boxShadow: CARD_SHADOW }}
               >
-                <div class="mb-5">
-                  <h2 class="text-lg font-heading font-bold text-charcoal">
+                {/* Section heading */}
+                <div class="mb-6">
+                  <h2 class="text-lg font-heading font-bold text-charcoal tracking-tight">
                     {activeMeta.label}
                   </h2>
-                  <p class="text-sm text-bark mt-1">{activeMeta.description}</p>
+                  <p class="text-sm font-body text-bark mt-1">
+                    {activeMeta.description}
+                  </p>
                 </div>
 
                 {activeSection === "characters" && (
@@ -320,11 +318,11 @@ export default function SettingsPage() {
 
                 {activeSection === "advanced" && (
                   <div class="space-y-6">
-                    <div>
-                      <h3 class="text-sm font-heading font-semibold text-charcoal mb-3">
+                    <section>
+                      <h3 class="text-base font-heading font-semibold text-charcoal mb-1">
                         Excluded Processes
                       </h3>
-                      <p class="text-xs text-bark mb-3">
+                      <p class="text-sm font-body text-bark mb-4">
                         System processes to ignore when scanning ports.
                       </p>
                       <ExcludedProcessesSection
@@ -332,20 +330,16 @@ export default function SettingsPage() {
                         onDelete={deleteExcludedProcess}
                         onAdd={addExcludedProcess}
                       />
-                    </div>
-                    <hr class="border-pebble/30" />
-                    <div>
-                      <h3 class="text-sm font-heading font-semibold text-charcoal mb-3">
+                    </section>
+                    <section>
+                      <h3 class="text-base font-heading font-semibold text-charcoal mb-1">
                         Poll Interval
                       </h3>
-                      <p class="text-xs text-bark mb-3">
-                        How often to check for new or stopped dev servers.
-                      </p>
                       <PollIntervalSection
                         pollInterval={config.pollInterval}
                         onChange={updatePollInterval}
                       />
-                    </div>
+                    </section>
                   </div>
                 )}
               </div>
@@ -353,7 +347,7 @@ export default function SettingsPage() {
           </div>
         )
         : (
-          <div class="text-center py-12 text-bark text-sm">
+          <div class="text-center py-12 text-bark text-sm font-body">
             Loading settings...
           </div>
         )}

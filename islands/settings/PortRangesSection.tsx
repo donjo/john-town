@@ -2,13 +2,12 @@
  * PortRangesSection — edit scanned port ranges.
  *
  * Each row has start port, end port, a label, and a delete button.
+ * Column labels sit above the inputs so it's clear what each field is.
  * An "add" button sits at the bottom.
  */
 
 import type { PortRange } from "@/lib/settings.ts";
-
-const INPUT =
-  "bg-cream border border-pebble rounded px-2 py-1.5 text-sm font-mono text-charcoal transition-colors duration-150 focus:border-meadow focus:outline-none";
+import { ADD_BTN, DELETE_BTN_HOVER, FIELD_LABEL, INPUT } from "./styles.ts";
 
 export function PortRangesSection(
   { portRanges, onChange, onDelete, onAdd }: {
@@ -23,56 +22,75 @@ export function PortRangesSection(
   },
 ) {
   return (
-    <div class="space-y-2">
-      {portRanges.map((r, i) => (
-        <div key={i} class="flex items-center gap-2">
-          <input
-            type="number"
-            value={r.start}
-            class={`${INPUT} w-20`}
-            onInput={(e) =>
-              onChange(
-                i,
-                "start",
-                parseInt((e.target as HTMLInputElement).value) || 0,
-              )}
-          />
-          <span class="text-pebble text-sm select-none">&ndash;</span>
-          <input
-            type="number"
-            value={r.end}
-            class={`${INPUT} w-20`}
-            onInput={(e) =>
-              onChange(
-                i,
-                "end",
-                parseInt((e.target as HTMLInputElement).value) || 0,
-              )}
-          />
-          <input
-            type="text"
-            value={r.label}
-            class={`${INPUT} flex-1`}
-            onInput={(e) =>
-              onChange(i, "label", (e.target as HTMLInputElement).value)}
-          />
-          <button
-            type="button"
-            class="text-pebble hover:text-charcoal cursor-pointer p-1 rounded transition-colors duration-150 hover:bg-sand"
-            onClick={() => onDelete(i)}
-            aria-label={`Remove port range ${r.start}-${r.end}`}
+    <div>
+      {/* Column labels */}
+      <div class="grid grid-cols-[5rem_auto_5rem_1fr_2rem] gap-2 mb-2 px-0.5">
+        <span class={FIELD_LABEL}>Start</span>
+        <span />
+        <span class={FIELD_LABEL}>End</span>
+        <span class={FIELD_LABEL}>Label</span>
+        <span />
+      </div>
+
+      <div class="space-y-1.5">
+        {portRanges.map((r, i) => (
+          <div
+            key={i}
+            class="group grid grid-cols-[5rem_auto_5rem_1fr_2rem] gap-2 items-center"
           >
-            {"\u2715"}
-          </button>
-        </div>
-      ))}
-      <button
-        type="button"
-        class="text-sm text-meadow hover:text-meadow-dark cursor-pointer font-heading font-semibold pt-1 transition-colors duration-150"
-        onClick={onAdd}
-      >
-        + Add Range
-      </button>
+            <input
+              type="number"
+              value={r.start}
+              class={INPUT}
+              onInput={(e) =>
+                onChange(
+                  i,
+                  "start",
+                  parseInt((e.target as HTMLInputElement).value) || 0,
+                )}
+            />
+            <span class="text-pebble text-sm text-center select-none">
+              &ndash;
+            </span>
+            <input
+              type="number"
+              value={r.end}
+              class={INPUT}
+              onInput={(e) =>
+                onChange(
+                  i,
+                  "end",
+                  parseInt((e.target as HTMLInputElement).value) || 0,
+                )}
+            />
+            <input
+              type="text"
+              value={r.label}
+              class={INPUT}
+              onInput={(e) =>
+                onChange(i, "label", (e.target as HTMLInputElement).value)}
+            />
+            <button
+              type="button"
+              class={DELETE_BTN_HOVER}
+              onClick={() => onDelete(i)}
+              aria-label={`Remove port range ${r.start}-${r.end}`}
+            >
+              {"\u2715"}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-pebble/20">
+        <button
+          type="button"
+          class={ADD_BTN}
+          onClick={onAdd}
+        >
+          + Add Range
+        </button>
+      </div>
     </div>
   );
 }
