@@ -21,6 +21,8 @@ port and it shows up here — no configuration needed.
 - **Live refresh** — Polls every 5 seconds so new servers appear and stopped
   ones disappear automatically
 - **Click to open** — Click any project name to open it in a new browser tab
+- **Configurable** — Customize port ranges, characters, poll interval, and
+  excluded processes via the settings drawer or `~/.john-town/settings.json`
 
 ## Requirements
 
@@ -38,12 +40,13 @@ Open [http://localhost:3333](http://localhost:3333) to see your dashboard.
 
 ## Commands
 
-| Command           | Description                                  |
-| ----------------- | -------------------------------------------- |
-| `deno task dev`   | Start dev server with hot reload (port 3333) |
-| `deno task build` | Build for production                         |
-| `deno task start` | Serve the production build                   |
-| `deno task check` | Run formatter, linter, and type checks       |
+| Command              | Description                                  |
+| -------------------- | -------------------------------------------- |
+| `deno task dev`      | Start dev server with hot reload (port 3333) |
+| `deno task build`    | Build for production                         |
+| `deno task start`    | Serve the production build                   |
+| `deno task compile`  | Build a standalone binary                    |
+| `deno task check`    | Run formatter, linter, and type checks       |
 
 ## Port Ranges
 
@@ -61,8 +64,9 @@ John Town scans these port ranges by default:
 | 8080–8090 | General purpose     |
 | 8888–8895 | Jupyter             |
 
-Port 5000 is skipped (used by macOS AirPlay Receiver). To add more ports, edit
-`DEFAULT_PORT_RANGES` in `lib/port-scanner.ts`.
+Port 5000 is skipped (used by macOS AirPlay Receiver). To customize port ranges,
+open the settings drawer at the bottom of the dashboard or edit
+`~/.john-town/settings.json`.
 
 ## Built With
 

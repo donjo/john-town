@@ -1,11 +1,15 @@
 {
+  "version": "0.1.0",
   "nodeModulesDir": "manual",
   "tasks": {
     "check": "deno fmt --check . && deno lint . && deno check",
     "dev": "vite --port 3333 --host 0.0.0.0",
     "build": "vite build",
     "start": "deno serve -A --host 0.0.0.0 --port 3333 _fresh/server.js",
-    "update": "deno run -A -r jsr:@fresh/update ."
+    "update": "deno run -A -r jsr:@fresh/update .",
+    "compile": "deno task build && deno compile --no-config --output john-town --include _fresh -A compile-entry.ts",
+    "compile:aarch64": "deno task build && deno compile --no-config --target aarch64-apple-darwin --output john-town-aarch64-apple-darwin --include _fresh -A compile-entry.ts",
+    "compile:x86_64": "deno task build && deno compile --no-config --target x86_64-apple-darwin --output john-town-x86_64-apple-darwin --include _fresh -A compile-entry.ts"
   },
   "lint": {
     "rules": {
