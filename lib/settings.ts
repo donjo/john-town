@@ -34,7 +34,7 @@ const DEFAULTS: Settings = {
     { start: 3100, end: 3110, label: "Backend APIs" },
     { start: 4000, end: 4010, label: "Phoenix, GraphQL" },
     { start: 5001, end: 5010, label: "Flask" },
-    { start: 5173, end: 5180, label: "Vite dev server" },
+    { start: 5173, end: 5200, label: "Vite dev server" },
     { start: 5800, end: 5810, label: "Custom dev servers" },
     { start: 8000, end: 8010, label: "Fresh, Django" },
     { start: 8080, end: 8090, label: "General purpose" },
