@@ -69,13 +69,6 @@ export default function ServerList({ initialServers }: ServerListProps) {
     fetchSettings();
   }, [fetchSettings]);
 
-  // Re-fetch settings immediately when TownSettings saves
-  useEffect(() => {
-    const handler = () => fetchSettings();
-    globalThis.addEventListener("settings-updated", handler);
-    return () => globalThis.removeEventListener("settings-updated", handler);
-  }, [fetchSettings]);
-
   useEffect(() => {
     const refreshServers = async () => {
       setIsRefreshing(true);
@@ -117,21 +110,40 @@ export default function ServerList({ initialServers }: ServerListProps) {
         <h1 class="text-xl font-heading font-bold text-charcoal tracking-tight">
           John Town
         </h1>
-        <span class="text-xs text-pebble flex items-center gap-1.5">
-          {isRefreshing
-            ? (
-              <>
-                <span class="w-1.5 h-1.5 bg-meadow rounded-full animate-pulse" />
-                Refreshing...
-              </>
-            )
-            : (
-              <>
-                <span class="w-1.5 h-1.5 bg-pebble/40 rounded-full" />
-                Auto-refresh {pollInterval / 1000}s
-              </>
-            )}
-        </span>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-pebble flex items-center gap-1.5">
+            {isRefreshing
+              ? (
+                <>
+                  <span class="w-1.5 h-1.5 bg-meadow rounded-full animate-pulse" />
+                  Refreshing...
+                </>
+              )
+              : (
+                <>
+                  <span class="w-1.5 h-1.5 bg-pebble/40 rounded-full" />
+                  Auto-refresh {pollInterval / 1000}s
+                </>
+              )}
+          </span>
+          <a
+            href="/settings"
+            class="text-pebble hover:text-charcoal transition-colors duration-150"
+            title="Town Settings"
+          >
+            <svg
+              class="w-5 h-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M8.34 1.804A1 1 0 019.32 1h1.36a1 1 0 01.98.804l.295 1.473c.497.179.971.405 1.416.67l1.39-.57a1 1 0 011.12.303l.96 1.18a1 1 0 01.063 1.205l-.795 1.175a7.06 7.06 0 01.099 1.52l1.03.96a1 1 0 01.204 1.175l-.62 1.12a1 1 0 01-1.065.522l-1.38-.27a7.09 7.09 0 01-1.11.932l.14 1.422a1 1 0 01-.607 1.03l-1.26.494a1 1 0 01-1.12-.303l-.88-1.086a7.122 7.122 0 01-1.53 0l-.88 1.086a1 1 0 01-1.12.303l-1.26-.494a1 1 0 01-.607-1.03l.14-1.422a7.08 7.08 0 01-1.11-.932l-1.38.27a1 1 0 01-1.065-.522l-.62-1.12a1 1 0 01.204-1.176l1.03-.96a7.06 7.06 0 01.099-1.52l-.795-1.174a1 1 0 01.063-1.206l.96-1.18a1 1 0 011.12-.302l1.39.57c.445-.266.919-.492 1.416-.67L8.34 1.804zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </a>
+        </div>
       </nav>
 
       {/* Table container with ledger border and warm shadow */}
