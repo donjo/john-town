@@ -1,5 +1,4 @@
 import { define } from "../utils.ts";
-import TownSettings from "../islands/TownSettings.tsx";
 
 export default define.page(function App({ Component }) {
   return (
@@ -21,7 +20,6 @@ export default define.page(function App({ Component }) {
       </head>
       <body class="font-body text-charcoal">
         <Component />
-        <TownSettings />
       </body>
     </html>
   );

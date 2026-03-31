@@ -1,11 +1,13 @@
 /**
  * ExcludedProcessesSection — manage process name exclusions.
+ *
+ * Shows existing exclusions as removable pills and an input to add new ones.
  */
 
 import { useRef } from "preact/hooks";
 
-const IC =
-  "bg-cream border border-pebble rounded px-2 py-1 text-sm font-mono text-charcoal focus:border-meadow focus:outline-none";
+const INPUT =
+  "bg-cream border border-pebble rounded px-2 py-1.5 text-sm font-mono text-charcoal transition-colors duration-150 focus:border-meadow focus:outline-none";
 
 export function ExcludedProcessesSection(
   { processes, onDelete, onAdd }: {
@@ -17,18 +19,19 @@ export function ExcludedProcessesSection(
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div class="pb-3">
-      <div class="flex flex-wrap gap-2 mb-2">
+    <div>
+      <div class="flex flex-wrap gap-2 mb-3">
         {processes.map((p, i) => (
           <span
             key={`${p}-${i}`}
-            class="inline-flex items-center gap-1 bg-sand border border-pebble rounded-full px-3 py-1 text-xs font-mono text-charcoal"
+            class="inline-flex items-center gap-1.5 bg-sand border border-pebble rounded-full px-3 py-1 text-xs font-mono text-charcoal transition-colors duration-150 hover:border-bark"
           >
             {p}
             <button
               type="button"
-              class="text-pebble hover:text-charcoal cursor-pointer"
+              class="text-pebble hover:text-charcoal cursor-pointer transition-colors duration-150"
               onClick={() => onDelete(i)}
+              aria-label={`Remove ${p}`}
             >
               {"\u2715"}
             </button>
@@ -40,11 +43,11 @@ export function ExcludedProcessesSection(
           ref={inputRef}
           type="text"
           placeholder="Process name"
-          class={IC}
+          class={INPUT}
         />
         <button
           type="button"
-          class="text-sm text-meadow hover:text-meadow-dark cursor-pointer font-heading"
+          class="text-sm text-meadow hover:text-meadow-dark cursor-pointer font-heading font-semibold transition-colors duration-150"
           onClick={() => {
             const name = inputRef.current?.value.trim();
             if (name) {

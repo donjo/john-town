@@ -40,13 +40,13 @@ Open [http://localhost:3333](http://localhost:3333) to see your dashboard.
 
 ## Commands
 
-| Command              | Description                                  |
-| -------------------- | -------------------------------------------- |
-| `deno task dev`      | Start dev server with hot reload (port 3333) |
-| `deno task build`    | Build for production                         |
-| `deno task start`    | Serve the production build                   |
-| `deno task compile`  | Build a standalone binary                    |
-| `deno task check`    | Run formatter, linter, and type checks       |
+| Command             | Description                                  |
+| ------------------- | -------------------------------------------- |
+| `deno task dev`     | Start dev server with hot reload (port 3333) |
+| `deno task build`   | Build for production                         |
+| `deno task start`   | Serve the production build                   |
+| `deno task compile` | Build a standalone binary                    |
+| `deno task check`   | Run formatter, linter, and type checks       |
 
 ## Port Ranges
 

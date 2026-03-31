@@ -1,13 +1,16 @@
 /**
  * CharactersSection — edit framework-to-character mappings.
+ *
+ * Each row shows the framework name (read-only), an emoji picker button,
+ * an editable label, and a delete button. An "add" row sits at the bottom.
  */
 
 import { useRef } from "preact/hooks";
 import type { Character } from "@/lib/settings.ts";
 import { EmojiButton } from "./EmojiPicker.tsx";
 
-const IC =
-  "bg-cream border border-pebble rounded px-2 py-1 text-sm font-mono text-charcoal focus:border-meadow focus:outline-none";
+const INPUT =
+  "bg-cream border border-pebble rounded px-2 py-1.5 text-sm font-mono text-charcoal transition-colors duration-150 focus:border-meadow focus:outline-none";
 
 export function CharactersSection(
   { characters, onChange, onDelete }: {
@@ -19,12 +22,12 @@ export function CharactersSection(
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div class="pb-3 space-y-2">
+    <div class="space-y-2">
       {Object.keys(characters).map((fw) => {
         const ch = characters[fw];
         return (
           <div key={fw} class="flex items-center gap-2">
-            <span class={`${IC} w-28 bg-sand`}>{fw}</span>
+            <span class={`${INPUT} w-28 bg-sand text-bark`}>{fw}</span>
             <EmojiButton
               emoji={ch.emoji}
               onChange={(em) => onChange(fw, "emoji", em)}
@@ -32,30 +35,31 @@ export function CharactersSection(
             <input
               type="text"
               value={ch.label}
-              class={`${IC} flex-1`}
+              class={`${INPUT} flex-1`}
               onInput={(e) =>
                 onChange(fw, "label", (e.target as HTMLInputElement).value)}
             />
             <button
               type="button"
-              class="text-pebble hover:text-charcoal cursor-pointer px-1"
+              class="text-pebble hover:text-charcoal cursor-pointer p-1 rounded transition-colors duration-150 hover:bg-sand"
               onClick={() => onDelete(fw)}
+              aria-label={`Remove ${fw}`}
             >
               {"\u2715"}
             </button>
           </div>
         );
       })}
-      <div class="flex items-center gap-2 mt-2">
+      <div class="flex items-center gap-2 pt-1">
         <input
           ref={inputRef}
           type="text"
           placeholder="Framework name"
-          class={IC}
+          class={INPUT}
         />
         <button
           type="button"
-          class="text-sm text-meadow hover:text-meadow-dark cursor-pointer font-heading"
+          class="text-sm text-meadow hover:text-meadow-dark cursor-pointer font-heading font-semibold transition-colors duration-150"
           onClick={() => {
             const name = inputRef.current?.value.trim();
             if (name) {
